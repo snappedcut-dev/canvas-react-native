@@ -59,16 +59,21 @@ For Expo, with a video picker wired up, use
 native app a Blob. Write it to disk with `expo-file-system` or
 `react-native-fs`.
 
-## The editing happens on the handset
+## The processing happens on our servers
 
-Decode, cut, filter and encode are WebCodecs calls **inside the WebView**, in
-the system web engine. So `load` and `export` need no network once the view is
-up, and the footage never leaves the device — which is the whole reason to
-embed this rather than an upload screen.
+Every decode, composite and encode runs on Snapped Cut's machines, not in the
+WebView. The view is a thin client: it sends the operation, we render it, it
+shows the result.
 
-The one exception is a **cloud render**, which is opt-in and costs credits. It
-reports itself through `onJob` with `credits` and the `endUserId` from your
-token, so you can meter per customer.
+Two consequences for an app:
+
+- **No engine in your bundle, and none in the WebView.** Embedding the editor
+  does not add a video pipeline to your app or a multi-megabyte download before
+  the first tap.
+- **Work is metered.** Operations report through `onJob` with `credits` and the
+  `endUserId` from your token, so you can meter per customer. A `load` or an
+  `export` is a round trip — show that progress rather than assuming it is
+  instant, especially on mobile data.
 
 ## How the bridge works, and why it matters
 

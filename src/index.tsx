@@ -70,10 +70,10 @@ const TIMEOUT_MS = 120_000;
 /**
  * The Snapped Cut editor in a React Native app.
  *
- * The editing runs **inside the WebView, on the device** — decode, cut and
- * encode are WebCodecs calls in the system web engine, not requests to a
- * server. So `load` and `export` need no network once the view is up, and the
- * footage never leaves the handset.
+ * The WebView is a **thin client**: decode, compositing and encode all happen
+ * on Snapped Cut's servers, so no engine code reaches the device. `load` and
+ * `export` are therefore round trips, not local calls — every one is work we
+ * do and meter, and each reports itself through `onJob` with its credit cost.
  */
 export const SnappedCutCanvas = forwardRef<SnappedCutCanvasHandle, SnappedCutCanvasProps>(
   function SnappedCutCanvas(props, ref) {
@@ -240,7 +240,7 @@ export const SnappedCutCanvas = forwardRef<SnappedCutCanvasHandle, SnappedCutCan
         // The editor is one screen; a bounce on a timeline is a dropped drag.
         bounces={false}
         overScrollMode="never"
-        // WebCodecs and the file picker both need these.
+        // The frame's UI and the file picker both need these.
         javaScriptEnabled
         domStorageEnabled
         allowFileAccess
