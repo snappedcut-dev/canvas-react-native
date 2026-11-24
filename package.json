@@ -1,0 +1,38 @@
+{
+  "name": "@snappedcut/canvas-react-native",
+  "version": "0.1.0",
+  "description": "The Snapped Cut video editor in a React Native app (WebView wrapper of the embed).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./bridge": { "types": "./dist/bridge.d.ts", "default": "./dist/bridge.js" }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=20" },
+  "repository": { "type": "git", "url": "git+https://github.com/snappedcut-dev/canvas-react-native.git" },
+  "homepage": "https://snappedcut.com/docs",
+  "bugs": "https://github.com/snappedcut-dev/canvas-react-native/issues",
+  "keywords": ["snappedcut", "react-native", "video-editor", "webview", "ios", "android"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.72",
+    "react-native-webview": ">=13"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "react": "18.3.1",
+    "react-native": "0.76.5",
+    "react-native-webview": "13.12.5",
+    "typescript": "5.9.3"
+  },
+  "publishConfig": { "access": "public", "provenance": true }
+}
