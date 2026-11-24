@@ -59,21 +59,26 @@ For Expo, with a video picker wired up, use
 native app a Blob. Write it to disk with `expo-file-system` or
 `react-native-fs`.
 
-## The processing happens on our servers
+## Where the processing runs
 
-Every decode, composite and encode runs on Snapped Cut's machines, not in the
-WebView. The view is a thin client: it sends the operation, we render it, it
-shows the result.
+**Today it runs inside the WebView, on the device.** Decode, compositing and
+encode all happen there on WebCodecs, so a clip the user picks never leaves the
+phone. The exception is **cloud render**, which is explicit and opt-in: the
+project is uploaded and rendered on our machines.
+
+Moving the processing server-side is the committed direction, but it is not what
+this version does. Read this section against the version you installed.
 
 Two consequences for an app:
 
-- **No engine in your bundle, and none in the WebView.** Embedding the editor
-  does not add a video pipeline to your app or a multi-megabyte download before
-  the first tap.
-- **Work is metered.** Operations report through `onJob` with `credits` and the
-  `endUserId` from your token, so you can meter per customer. A `load` or an
-  `export` is a round trip — show that progress rather than assuming it is
-  instant, especially on mobile data.
+- **No engine in your JS bundle, but the WebView does load one.** Nothing is
+  added to your app binary; the first mount fetches the editor over the network,
+  so it needs a connection and is slower on mobile data.
+- **Encoding on a phone is work the phone does.** A long export warms the device
+  and drains battery, and a low-end Android will be noticeably slower. Show
+  progress from `onJob` rather than assuming an export is instant.
+- **Only cloud render is metered.** On-device editing costs no credits; a cloud
+  render reports through `onJob` with `credits` and your token's `endUserId`.
 
 ## How the bridge works, and why it matters
 
