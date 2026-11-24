@@ -1,6 +1,6 @@
 {
   "name": "@snappedcut/canvas-react-native",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "The Snapped Cut video editor in a React Native app (WebView wrapper of the embed).",
   "license": "MIT",
   "type": "module",

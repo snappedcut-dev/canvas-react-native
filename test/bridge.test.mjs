@@ -110,3 +110,10 @@ test('CanvasError keeps its code for branching', () => {
   assert.equal(error.code, 'unauthorized');
   assert.ok(error instanceof Error);
 });
+
+test('features ride in the query and the token stays in the hash', () => {
+  const url = new URL(canvasUrl({ frameId: 'f1', publishableKey: 'pk_test_x', token: 'tok', features: { formats: ['mp4'] } }));
+  assert.deepEqual(JSON.parse(url.searchParams.get('features')), { formats: ['mp4'] });
+  assert.equal(url.searchParams.get('host'), 'react-native');
+  assert.equal(url.hash, '#t=tok');
+});

@@ -19,7 +19,8 @@
 export const PROTOCOL_VERSION = 1;
 export const DEFAULT_ORIGIN = 'https://snappedcut.com';
 
-export type ExportFormat = 'webm' | 'mp4' | 'mkv' | 'mov' | 'gif' | 'png';
+/** What the server renders; which of these a session may use is its `features.formats`. */
+export type ExportFormat = 'mp4' | 'webm' | 'mov' | 'mkv';
 
 export type CanvasErrorCode =
   | 'invalid_input'
@@ -30,6 +31,8 @@ export type CanvasErrorCode =
   | 'unsupported'
   | 'network_error'
   | 'export_failed'
+  | 'credits_exhausted'
+  | 'rate_limited'
   | 'internal';
 
 export class CanvasError extends Error {
@@ -61,7 +64,7 @@ export type FrameMessage = {
   readonly type: FrameEventName;
   readonly id?: number;
   readonly payload?: unknown;
-  readonly error?: { code: CanvasErrorCode; message: string };
+  readonly error?: { code: CanvasErrorCode; message: string; retryAfterMs?: number };
 };
 
 /**
@@ -106,6 +109,7 @@ export function canvasUrl(config: {
   publishableKey?: string | undefined;
   token?: string | undefined;
   locale?: string | undefined;
+  features?: unknown;
   frameId: string;
 }): string {
   const origin = (config.origin ?? DEFAULT_ORIGIN).replace(/\/+$/, '');
@@ -118,6 +122,8 @@ export function canvasUrl(config: {
   });
   if (config.publishableKey) query.set('key', config.publishableKey);
   if (config.locale) query.set('locale', config.locale);
+  // Not a secret, and it only narrows what the token grants.
+  if (config.features) query.set('features', JSON.stringify(config.features));
 
   const url = `${origin}/embed?${query.toString()}`;
   // The token goes in the hash: a hash is not sent to the server, so it stays

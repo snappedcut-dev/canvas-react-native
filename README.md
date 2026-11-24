@@ -46,39 +46,35 @@ For Expo, with a video picker wired up, use
 | `publishableKey` | `pk_live_…`. Public by design; locked to an allowlist. |
 | `token` / `getToken` | A server-minted token carrying an `endUserId`, and how to refresh it. |
 | `origin` | Override for a self-hosted install. |
-| `locale`, `theme`, `style` | |
+| `locale` | `en` or `es`. |
+| `theme` | The web embed's tokens (`bg`, `surface`, `text`, `accent`, `radius`, `font` …). A change is sent live. |
+| `features` | Narrows the token's signed features: `stock`, `assistant`, `projects`, `share`, `branding`, `panels`, `formats`. |
+| `style` | |
 | `onReady` `onError` `onChange` `onExport` `onJob` | |
 
 | On the ref | |
 | --- | --- |
-| `load(uri)` | Open a project bundle or a media file. |
-| `export(format, options?)` | `webm`, `mp4`, `mkv`, `mov`, `gif`, `png`. |
-| `getProject()` | The current timeline, as JSON. |
+| `load(uri)` | Add a media file, or reopen a project bundle, from an `https:` or `file:` URI. |
+| `export(format, options?)` | `mp4`, `webm`, `mov` or `mkv` (as the session's `features.formats` allows). Options: `targetWidth`, `scale`, `quality`, `uploadUrl`. |
+| `getProject({ uploadUrl })` | The whole project as a bundle, PUT to your storage. |
+| `setTheme(theme)` | Switches the theme live. |
 
-`export` resolves with a **`data:` URI**, not a Blob — a WebView cannot hand a
-native app a Blob. Write it to disk with `expo-file-system` or
-`react-native-fs`.
+**Pass `uploadUrl` to get a file into your app.** Give the call a presigned
+https PUT URL on your storage. The WebView uploads the file there and resolves
+with `{ uploaded: true, contentType, bytes, … }`. Without `uploadUrl`, `export`
+resolves with a `blob:` `uri` that only the WebView can read. The bucket must
+allow a CORS PUT from `https://snappedcut.com`.
 
 ## Where the processing runs
 
-**Today it runs inside the WebView, on the device.** Decode, compositing and
-encode all happen there on WebCodecs, so a clip the user picks never leaves the
-phone. The exception is **cloud render**, which is explicit and opt-in: the
-project is uploaded and rendered on our machines.
+Editing runs in the WebView, on the device: a clip the user picks is not
+uploaded while they edit. **`export` renders on Snapped Cut's servers.** The
+project is uploaded, rendered and billed to the token's session, and reports
+itself through `onJob` with `credits` and your token's `endUserId`. A failed
+render refunds itself.
 
-Moving the processing server-side is the committed direction, but it is not what
-this version does. Read this section against the version you installed.
-
-Two consequences for an app:
-
-- **No engine in your JS bundle, but the WebView does load one.** Nothing is
-  added to your app binary; the first mount fetches the editor over the network,
-  so it needs a connection and is slower on mobile data.
-- **Encoding on a phone is work the phone does.** A long export warms the device
-  and drains battery, and a low-end Android will be noticeably slower. Show
-  progress from `onJob` rather than assuming an export is instant.
-- **Only cloud render is metered.** On-device editing costs no credits; a cloud
-  render reports through `onJob` with `credits` and your token's `endUserId`.
+The first mount fetches the editor over the network, so it needs a connection.
+Nothing is added to your app binary.
 
 ## How the bridge works, and why it matters
 
